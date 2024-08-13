@@ -85,5 +85,15 @@ export const boardHandler: CategoryHandler<BoardMessageCategory> = {
 		return {
 			forwardedResponse: payload
 		};
+	},
+
+	handleChatMessage: async (payload, { dispatcher }) => {
+		const name = dispatcher.session.isOwner(dispatcher) ? 'GM' : 'Guest'; //TODO Replace guest with the actual name of the user
+		return {
+			type: 'chatMessage',
+			content: {
+				message: `${name}: ${payload.message}`
+			}
+		};
 	}
 };

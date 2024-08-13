@@ -10,6 +10,7 @@ import {
 
 type ChannelCallback<S, T extends keyof S> = (response: ResponseMessage<S, T>) => void;
 type ChannelCallbackMap<S> = Map<number, ChannelCallback<S, keyof S>>;
+type NamedCallbackMap<S> = Map<string, [ChannelCallback<S, keyof S>]>;
 
 interface Props {
 	unready: boolean;
@@ -20,6 +21,8 @@ const defaultProps: Props = {
 
 export abstract class MessageSocket<HANDLED, SENT> {
 	private readonly activeChannelCallbacks: ChannelCallbackMap<SENT> = new Map();
+
+	private readonly activeNamedCallbacks: NamedCallbackMap<SENT> = new Map();
 
 	private readonly readyEvent: Promise<void>;
 	private resolveReadyState?: () => void;
@@ -49,13 +52,16 @@ export abstract class MessageSocket<HANDLED, SENT> {
 	}
 
 	private findUnusedChannel(): number {
+		console.log("Finding unused channel");
 		const countActiveChannels = this.activeChannelCallbacks.size;
 
 		for (let channel = 0; channel < countActiveChannels; channel++) {
 			if (!this.activeChannelCallbacks.has(channel)) {
+				console.log("Found unused channel", channel);
 				return channel;
 			}
 		}
+		console.log("No unused channel found, using", countActiveChannels);
 
 		return countActiveChannels;
 	}
@@ -70,11 +76,12 @@ export abstract class MessageSocket<HANDLED, SENT> {
 	public async request<T extends keyof SENT>(
 		name: T,
 		payload: Payload<SENT, T>
-	): Promise<Response<SENT, T>> {
+	): Promise<unknown> {
 		return new Promise((resolve, reject) => {
 			const channel = this.findUnusedChannel();
 
 			this.activeChannelCallbacks.set(channel, (responseMessage) => {
+				console.log("Received response", responseMessage);
 				const { error, response: payload } = responseMessage;
 
 				if (error || !payload) {
@@ -92,10 +99,29 @@ export abstract class MessageSocket<HANDLED, SENT> {
 		});
 	}
 
+	//Define a listen function that can attach a callback to a named channel and trigger a callback when a message is received on that channel
+	public async listen<T extends keyof SENT>(
+		name: T,
+		callback: ChannelCallback<SENT, T>
+	) {
+		const callbacks = this.activeNamedCallbacks.get(name as string) ?? [];
+		callbacks.push(callback);
+		this.activeNamedCallbacks.set(name as string, callbacks);
+	}
+
 	private handleResponse(response: ResponseMessage<SENT, keyof SENT>) {
 		const { channel } = response;
 
 		const triggerCallback = this.activeChannelCallbacks.get(channel);
+
+		if (response?.response?.type) {
+			const callbacks = this.activeNamedCallbacks.get(response.response.type);
+			if (callbacks) {
+				for (const callback of callbacks) {
+					callback(response?.response?.content);
+				}
+			}
+		}
 
 		if (triggerCallback) {
 			this.activeChannelCallbacks.delete(channel);
