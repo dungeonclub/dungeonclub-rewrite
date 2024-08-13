@@ -18,4 +18,3 @@ npm install
 npm run hardsync
 npm run dev
 ```
-

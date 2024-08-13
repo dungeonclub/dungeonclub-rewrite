@@ -1,5 +1,5 @@
 import { MailService, type SendMailOptions } from '../mail-service';
-import {writeFile, writeFileSync} from "fs";
+import { writeFileSync } from 'fs';
 
 export class DummyMailService extends MailService {
 	constructor() {
