@@ -4,9 +4,11 @@ import { AssetManager } from './asset-manager';
 import { prisma } from './prisma';
 import type { MailService } from './services/mail-service';
 import { GmailMailService } from './services/mail/service-gmail';
+import {DummyMailService} from "./services/mail/service-local";
 import { SessionManager } from './session';
 import { ConnectionSocket } from './socket';
 import { getWebSocketServer } from './ws-server/ws-server';
+import { GMAIL_API_CLIENT_ID } from '$env/static/private';
 
 export { prisma };
 
@@ -16,7 +18,7 @@ export class Server {
 	readonly sessionManager = new SessionManager();
 	readonly webSocketManager = new WebSocketManager();
 
-	readonly mailService: MailService = new GmailMailService();
+	readonly mailService: MailService = import.meta.env.PROD || GMAIL_API_CLIENT_ID ? new GmailMailService() : new DummyMailService();
 
 	async start() {
 		this.webSocketManager.start();
