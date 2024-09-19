@@ -6,8 +6,7 @@ const EMAIL_OUTPUT_DIRECTORY = 'logs';
 
 export class DummyMailService extends MailService {
 	async sendMail(options: SendMailOptions): Promise<void> {
-		const timestamp = new Date().toISOString().replace(/:/g, '-');
-
+		const timestamp = Date.now();
 		const filePath = path.join(EMAIL_OUTPUT_DIRECTORY, `email-${timestamp}.html`);
 
 		await mkdir(EMAIL_OUTPUT_DIRECTORY, { recursive: true });
