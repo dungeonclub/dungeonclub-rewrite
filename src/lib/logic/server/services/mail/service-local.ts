@@ -1,20 +1,23 @@
+import { mkdir, writeFile } from 'fs/promises';
+import path from 'path';
 import { MailService, type SendMailOptions } from '../mail-service';
-import { writeFileSync } from 'fs';
+
+const EMAIL_OUTPUT_DIRECTORY = 'logs';
 
 export class DummyMailService extends MailService {
-	constructor() {
-		super();
-		console.log('DummyMailService initialized for local development');
-	}
-
 	async sendMail(options: SendMailOptions): Promise<void> {
-		console.log('--- Dummy Email Service ---');
-		console.log('To:', options.recipient);
-		console.log('Subject:', options.subject);
-		const filename = `logs/email-${new Date().toISOString().replace(/:/g, '-')}.html`;
-		await writeFileSync(filename, options.htmlBody);
-		console.log('--- End of Dummy Email ---');
+		const timestamp = new Date().toISOString().replace(/:/g, '-');
 
-		console.log('Dummy email sent successfully: ' + filename);
+		const filePath = path.join(EMAIL_OUTPUT_DIRECTORY, `email-${timestamp}.html`);
+
+		await mkdir(EMAIL_OUTPUT_DIRECTORY, { recursive: true });
+		await writeFile(filePath, options.htmlBody);
+
+		console.warn(
+			[
+				`Email with subject "${options.subject}" will NOT be sent, because no mailing service is configured.`,
+				`Instead, you can find the email body at "${filePath}".`
+			].join('\n')
+		);
 	}
 }
