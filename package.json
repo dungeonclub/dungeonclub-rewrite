@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
+		"format": "prettier --write --end-of-line crlf .",
 		"generate": "prisma generate",
 		"hardsync": "prisma db push",
 		"postinstall": "npm run generate"

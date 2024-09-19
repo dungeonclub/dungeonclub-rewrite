@@ -12,5 +12,10 @@ export default defineConfig({
 	assetsInclude: '**/*.mjml',
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
+	},
+	server: {
+		watch: {
+			ignored: ['**/logs/**/*']
+		}
 	}
 });
