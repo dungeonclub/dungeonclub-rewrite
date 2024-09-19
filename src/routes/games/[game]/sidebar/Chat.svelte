@@ -1,37 +1,30 @@
 <script lang="ts">
-	import { getSocket } from 'client/communication';
 	import { socket } from 'client/communication';
+	import { Session } from 'client/state';
 
-	import { onMount } from 'svelte';
+	const messages = Session.instance.chatMessages;
 
-	let messages: string[] = [];
-
-	let message = `Hello world!`;
+	let enteredMessage = '';
 
 	const sendMessage = () => {
-		if (message.trim()) {
-			console.log('Sending message', message);
-			getSocket().request('chatMessage', { message });
-			message = '';
+		if (enteredMessage.trim()) {
+			$socket.send('chat', {
+				message: enteredMessage
+			});
+
+			enteredMessage = '';
 		}
 	};
-
-	onMount(() => {
-		$socket.listen('chatMessage', (data) => {
-			console.log('Got a chat message', data);
-			messages = [...messages, data.message];
-		});
-	});
 </script>
 
 <div class="chat-container">
 	<div class="messages">
-		{#each messages as message}
+		{#each $messages as message}
 			<div class="message">{message}</div>
 		{/each}
 	</div>
 	<div class="input-area">
-		<textarea bind:value={message} placeholder="Type your message here..."></textarea>
+		<textarea bind:value={enteredMessage} placeholder="Type your message here..."></textarea>
 		<button class="action" on:click={sendMessage}>Send</button>
 	</div>
 </div>
