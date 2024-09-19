@@ -1,14 +1,15 @@
+import { env } from '$env/dynamic/private';
 import type { WebSocket } from 'ws';
 import { AccountManager } from './account-manager';
 import { AssetManager } from './asset-manager';
 import { prisma } from './prisma';
-import type { MailService } from './services/mail-service';
+import { MailService } from './services/mail-service';
 import { GmailMailService } from './services/mail/service-gmail';
 import { DummyMailService } from './services/mail/service-local';
+import { SMTPMailService } from './services/mail/service-smtp';
 import { SessionManager } from './session';
 import { ConnectionSocket } from './socket';
 import { getWebSocketServer } from './ws-server/ws-server';
-import { GMAIL_API_CLIENT_ID } from '$env/static/private';
 
 export { prisma };
 
@@ -18,8 +19,21 @@ export class Server {
 	readonly sessionManager = new SessionManager();
 	readonly webSocketManager = new WebSocketManager();
 
-	readonly mailService: MailService =
-		import.meta.env.PROD || GMAIL_API_CLIENT_ID ? new GmailMailService() : new DummyMailService();
+	readonly mailService: MailService = Server.parseMailServiceType(env.MAIL_SERVICE);
+
+	static parseMailServiceType(mailServiceType: string): MailService {
+		switch (mailServiceType) {
+			case 'gmail':
+				return new GmailMailService();
+			case 'smtp':
+				return new SMTPMailService();
+			default:
+				console.error(
+					`Unsupported mail service "${mailServiceType}", falling back to dummy email service.`
+				);
+				return new DummyMailService();
+		}
+	}
 
 	async start() {
 		this.webSocketManager.start();
