@@ -11,6 +11,7 @@ import type { WebSocket } from 'ws';
 import { accountHandler } from './handlers/account-handler';
 import { boardHandler } from './handlers/board-handler';
 import { campaignHandler } from './handlers/campaign-handler';
+import { sessionHandler } from './handlers/session-handler';
 import { User } from './user';
 
 export interface HandlerOptions {
@@ -23,6 +24,7 @@ export class ServerMessageHandler extends MessageHandler<ServerHandledMessages, 
 	account = accountHandler;
 	board = boardHandler;
 	campaign = campaignHandler;
+	session = sessionHandler;
 }
 
 export const serverMessageHandler = new ServerMessageHandler();

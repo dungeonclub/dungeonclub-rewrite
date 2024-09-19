@@ -1,4 +1,4 @@
-import { Board } from 'client/state';
+import { Board, Session } from 'client/state';
 import {
 	MessageHandler,
 	type AccountMessageCategory,
@@ -7,6 +7,7 @@ import {
 	type CategoryHandlers,
 	type ClientHandledMessages
 } from 'shared';
+import type { SessionMessageCategory } from 'shared/messages/session';
 
 type Options = {};
 
@@ -26,4 +27,8 @@ export class ClientRequestHandler extends MessageHandler<ClientHandledMessages, 
 	};
 
 	campaign: CategoryHandlers<CampaignMessageCategory, ClientHandledMessages, Options> = {};
+
+	session: CategoryHandlers<SessionMessageCategory, ClientHandledMessages, Options> = {
+		onChat: (payload) => Session.instance.onChatMessage(payload.message)
+	};
 }

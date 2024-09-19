@@ -1,8 +1,12 @@
 import type { AccountMessageCategory } from './account';
 import type { BoardMessageCategory } from './board';
 import type { CampaignMessageCategory } from './campaign';
+import type { SessionMessageCategory } from './session';
 
-export type AllMessages = AccountMessageCategory & BoardMessageCategory & CampaignMessageCategory;
+export type AllMessages = AccountMessageCategory &
+	BoardMessageCategory &
+	CampaignMessageCategory &
+	SessionMessageCategory;
 
 export interface IMessage<P> {
 	payload: P;

@@ -1,3 +1,4 @@
+import type { SessionMessageCategory } from 'shared/messages/session';
 import type {
 	AccountMessageCategory,
 	BoardMessageCategory,
@@ -26,10 +27,11 @@ export abstract class MessageHandler<HANDLED, OPTIONS> {
 	abstract account: CategoryHandlers<AccountMessageCategory, HANDLED, OPTIONS>;
 	abstract board: CategoryHandlers<BoardMessageCategory, HANDLED, OPTIONS>;
 	abstract campaign: CategoryHandlers<CampaignMessageCategory, HANDLED, OPTIONS>;
+	abstract session: CategoryHandlers<SessionMessageCategory, HANDLED, OPTIONS>;
 
 	private _allHandlers: CategoryHandlers<unknown, HANDLED, OPTIONS>[] | undefined;
 	get allHandlers() {
-		return (this._allHandlers ??= [this.account, this.board, this.campaign]);
+		return (this._allHandlers ??= [this.account, this.board, this.campaign, this.session]);
 	}
 
 	handle<T extends keyof HANDLED & string>(

@@ -1,5 +1,5 @@
 import type { CampaignSnippet, GetPayload } from 'shared';
-import { derived } from 'svelte/store';
+import { derived, readonly, writable } from 'svelte/store';
 import { getSocket } from '../communication';
 import { Board } from './board';
 import { WithState } from './with-state';
@@ -26,6 +26,13 @@ export class Session {
 	readonly state = derived([this.campaign.state], ([campaign]) => ({
 		campaign
 	}));
+
+	private readonly _chatMessages = writable<string[]>([]);
+	readonly chatMessages = readonly(this._chatMessages);
+
+	onChatMessage(message: string) {
+		this._chatMessages.update((messages) => [...messages, message]);
+	}
 }
 
 export const sessionState = Session.state;
